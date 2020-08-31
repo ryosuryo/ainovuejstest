@@ -83,7 +83,7 @@ export default {
     }),
     imageUrlAlt: function(event) {
       event.target.src =
-        "https://complianz.io/wp-content/uploads/2019/03/placeholder-300x202.jpg.webp";
+        "https://cdn3.vectorstock.com/i/thumb-large/01/02/graphic-fast-food-vector-19740102.jpg";
     },
     selectCategory: function(id) {
       this.selectedCategory = id;
