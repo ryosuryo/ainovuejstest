@@ -1,9 +1,41 @@
 /* eslint-disable */
 import axios from "axios";
-import LocalStorageService from "./LocalStorageService";
 import router from "../_router";
-// LocalstorageService
-const localStorageService = LocalStorageService.getService();
+
+const LSService = (function() {
+  var _service;
+  function _getService() {
+    if (!_service) {
+      _service = this;
+      return _service;
+    }
+    return _service;
+  }
+  function _setToken(tokenObj) {
+    console.log(tokenObj);
+    localStorage.setItem("access_token", tokenObj.token);
+    localStorage.setItem("refresh_token", tokenObj.refresh_token);
+  }
+  function _getAccessToken() {
+    return localStorage.getItem("access_token");
+  }
+  function _getRefreshToken() {
+    return localStorage.getItem("refresh_token");
+  }
+  function _clearToken() {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+  }
+  return {
+    getService: _getService,
+    setToken: _setToken,
+    getAccessToken: _getAccessToken,
+    getRefreshToken: _getRefreshToken,
+    clearToken: _clearToken
+  };
+})();
+// LSService
+const LocalSService = LSService.getService();
 const baseURL = "https://private-anon-87f9034263-retailmockapp.apiary-mock.com";
 const http = axios.create({
   baseURL
@@ -11,8 +43,8 @@ const http = axios.create({
 // Add a request interceptor
 http.interceptors.request.use(
   config => {
-    console.log(localStorageService.getAccessToken());
-    const token = localStorageService.getAccessToken();
+    console.log(LocalSService.getAccessToken());
+    const token = LocalSService.getAccessToken();
     if (token) {
       config.headers["Authorization"] = "Bearer " + token;
     }
@@ -35,16 +67,16 @@ http.interceptors.response.use(
     }
     if (error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      const refreshToken = localStorageService.getRefreshToken();
+      const refreshToken = LocalSService.getRefreshToken();
       return axios
         .post("/auth/token", {
           refresh_token: refreshToken
         })
         .then(res => {
           if (res.status === 201) {
-            localStorageService.setToken(res.data);
+            LocalSService.setToken(res.data);
             axios.defaults.headers.common["Authorization"] =
-              "Bearer " + localStorageService.getAccessToken();
+              "Bearer " + LocalSService.getAccessToken();
             return axios(originalRequest);
           }
         });
